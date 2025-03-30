@@ -10,18 +10,18 @@ on:
         type: string
         required: false
         default: good first issue
-    language:
-      type: string
-      required: false
-      default: java
-    stars:
-      type: number
-      required: false
-      default: 1
-    limit:
-      type: number
-      required: false
-      default: 100
+      language:
+        type: string
+        required: false
+        default: java
+      stars:
+        type: number
+        required: false
+        default: 1
+      limit:
+        type: number
+        required: false
+        default: 100
 
 jobs:
   generate-html:
