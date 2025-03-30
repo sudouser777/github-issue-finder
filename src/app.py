@@ -31,6 +31,7 @@ def find_issues() -> list[Issue]:
     result = []
     try:
         gh = Github(auth=auth)
+        print(gh.get_rate_limit(), gh.rate_limiting, gh.rate_limiting_resettime)
         issues = gh.search_issues(query=f'label:"{args.label}" language:{args.language} is:open')
 
         futures = []
