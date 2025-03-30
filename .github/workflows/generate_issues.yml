@@ -2,6 +2,8 @@ name: Generate GitHub Issues HTML Page
 
 on:
   push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       label:
@@ -41,7 +43,7 @@ jobs:
     - name: Run the GitHub Issues script
       run: |
         echo "Running with label: ${{ inputs.label }}, language: ${{ inputs.language }}, stars: ${{ inputs.stars }}, limit: ${{ inputs.limit }}"
-        python src/app.py --label "${{ inputs.label }}" --language "${{ inputs.language }}" --stars "${{ inputs.stars }}" --limit "${{ inputs.limit }}"
+        python src/app.py --label "${{ inputs.label || 'good first issue' }}" --language "${{ inputs.language || 'java' }}" --stars "${{ inputs.stars || 1 }}" --limit "${{ inputs.limit || 500 }}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
