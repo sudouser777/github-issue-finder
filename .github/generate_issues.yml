@@ -1,0 +1,60 @@
+name: Generate GitHub Issues HTML Page
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      label:
+        type: string
+        required: false
+        default: good first issue
+    language:
+      type: string
+      required: false
+      default: java
+    stars:
+      type: number
+      required: false
+      default: 1
+    limit:
+      type: number
+      required: false
+      default: 100
+
+jobs:
+  generate-html:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        pip install -r src/requirements.txt
+
+    - name: Run the GitHub Issues script
+      run: |
+        python generate_issues.py --label "${{ inputs.label }}" --language "${{ inputs.language }}" --stars ${{ inputs.stars }} --limit ${{ inputs.limit }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Jekyll site
+      run: |
+        bundle install
+        bundle exec jekyll build
+
+    - name: Commit the generated HTML
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git add index.html
+        git commit -m "Generated GitHub issues HTML page"
+        git push
