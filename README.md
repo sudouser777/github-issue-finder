@@ -46,9 +46,8 @@ You can trigger the workflow through:
 ### Setting up GitHub Pages
 The script also integrates with Jekyll to host the generated HTML file on **GitHub Pages**. After running the workflow, the generated page will be accessible at:
 
-```plaintext
-https://<your-username>.github.io/github-issue-finder/
-```
+[github-issue-finder](https://sudouser777.github.io/github-issue-finder/)
+
 
 ## Contributing
 Feel free to fork this repository and submit pull requests for any improvements.
