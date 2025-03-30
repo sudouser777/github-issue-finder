@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from itertools import groupby
 
 from bs4 import BeautifulSoup
 from github import Github
@@ -50,25 +51,38 @@ def find_issues() -> list[Issue]:
 def create_table_rows(soup: BeautifulSoup, issues: list[Issue]):
     table_body = soup.find(id='issues-table').find('tbody')
     table_body.clear()
+    key = lambda x: x.repository.full_name
 
-    for issue in issues:
+    for _, issue_group in groupby(sorted(issues, key=key), key=key):
         row = soup.new_tag('tr')
+        repo = None
+
+        # Create issue links
+        issue_cell = soup.new_tag('td')
+        issue_list = soup.new_tag('ul')
+        for issue in issue_group:
+            issue_list_element = soup.new_tag('li')
+            issue_link = soup.new_tag('a', href=issue.html_url, target="_blank")
+            issue_link.string = f'Issues#{issue.number}'
+            issue_list_element.append(issue_link)
+            issue_list.append(issue_list_element)
+            repo = issue.repository
+        issue_cell.append(issue_list)
+
+        if not repo:
+            continue
 
         # Create repository link
         repo_cell = soup.new_tag('td')
-        repo_link = soup.new_tag('a', href=issue.repository.html_url, target="_blank")
-        repo_link.string = issue.repository.full_name
+        repo_link = soup.new_tag('a', href=repo.html_url, target="_blank")
+        repo_link.string = repo.full_name
         repo_cell.append(repo_link)
 
-        # Create issue link
-        issue_cell = soup.new_tag('td')
-        issue_link = soup.new_tag('a', href=issue.html_url, target="_blank")
-        issue_link.string = f'Issues#{issue.number}'
-        issue_cell.append(issue_link)
+
 
         # Create stars count
         stars_cell = soup.new_tag('td')
-        stars_cell.string = str(issue.repository.stargazers_count)
+        stars_cell.string = str(repo.stargazers_count)
 
         # Append the cells to the row
         row.append(repo_cell)
