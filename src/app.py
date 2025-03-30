@@ -3,7 +3,7 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
 from github import Github
 from github.Auth import Token
 from github.Issue import Issue
@@ -18,29 +18,40 @@ parser.add_argument('-s', '--stars', default=10, type=int, required=False, help=
 args = parser.parse_args(sys.argv[1:])
 
 
+def filter_issue(issue: Issue) -> Issue | None:
+    try:
+        if issue.repository.stargazers_count >= args.stars:
+            return issue
+    except Exception as e:
+        print('Error occurred:', e)
+
+
 def find_issues() -> list[Issue]:
     result = []
-    count = 0
     try:
         gh = Github(auth=auth)
         issues = gh.search_issues(query=f'label:"{args.label}" language:{args.language} is:open')
 
-        while True:
+        futures = []
+        with ThreadPoolExecutor(max_workers=5) as executor:
             for issue in issues:
-                count += 1
-                if issue.repository.stargazers_count >= args.stars:
-                    result.append(issue)
+                futures.append(executor.submit(filter_issue, issue))
+                if len(futures) == args.limit:
+                    break
 
-                if count == args.limit:
-                    return result
+        for future in as_completed(futures):
+            if issue := future.result():
+                result.append(issue)
     except Exception as e:
         print('Error occurred', e)
     return result
 
 
-def create_row(issue: Issue) -> Tag|None:
-    soup = BeautifulSoup('', features='html.parser')
-    try:
+def create_table_rows(soup: BeautifulSoup, issues: list[Issue]):
+    table_body = soup.find(id='issues-table').find('tbody')
+    table_body.clear()
+
+    for issue in issues:
         row = soup.new_tag('tr')
 
         # Create repository link
@@ -63,20 +74,8 @@ def create_row(issue: Issue) -> Tag|None:
         row.append(repo_cell)
         row.append(issue_cell)
         row.append(stars_cell)
-    except Exception as e:
-        print('Error occurred', e)
 
-
-def create_table_rows(soup: BeautifulSoup, issues: list[Issue]):
-    table_body = soup.find(id='issues-table').find('tbody')
-    table_body.clear()
-
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = [executor.submit(create_row, issue) for issue in issues]
-
-        for future in as_completed(futures):
-            if row := future.result():
-                table_body.append(row)
+        table_body.append(row)
 
 
 def find_issues_and_populate_html() -> None:
