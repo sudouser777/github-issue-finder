@@ -71,7 +71,7 @@ def create_table_rows(soup: BeautifulSoup, issues: list[Issue]):
     table_body = soup.find(id='issues-table').find('tbody')
     table_body.clear()
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(create_row, issue) for issue in issues]
 
         for future in as_completed(futures):
