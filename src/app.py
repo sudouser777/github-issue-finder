@@ -1,8 +1,9 @@
 import argparse
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from github import Github
 from github.Auth import Token
 from github.Issue import Issue
@@ -36,11 +37,10 @@ def find_issues() -> list[Issue]:
         print('Error occurred', e)
     return result
 
-def create_table_rows(soup: BeautifulSoup, issues: list[Issue]):
-    table_body = soup.find(id='issues-table').find('tbody')
-    table_body.clear()
 
-    for issue in issues:
+def create_row(issue: Issue) -> Tag|None:
+    soup = BeautifulSoup('', features='html.parser')
+    try:
         row = soup.new_tag('tr')
 
         # Create repository link
@@ -63,12 +63,25 @@ def create_table_rows(soup: BeautifulSoup, issues: list[Issue]):
         row.append(repo_cell)
         row.append(issue_cell)
         row.append(stars_cell)
+    except Exception as e:
+        print('Error occurred', e)
 
-        table_body.append(row)
+
+def create_table_rows(soup: BeautifulSoup, issues: list[Issue]):
+    table_body = soup.find(id='issues-table').find('tbody')
+    table_body.clear()
+
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(create_row, issue) for issue in issues]
+
+        for future in as_completed(futures):
+            if row := future.result():
+                table_body.append(row)
+
 
 def find_issues_and_populate_html() -> None:
     issues = find_issues()
-    with open('template.html') as fp, open('../index.html', 'w') as fw:
+    with open('src/template.html') as fp, open('index.html', 'w') as fw:
         soup = BeautifulSoup(fp, features='html.parser')
         create_table_rows(soup, issues)
         fw.write(soup.prettify())
