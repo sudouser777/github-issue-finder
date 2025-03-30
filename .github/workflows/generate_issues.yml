@@ -42,7 +42,7 @@ jobs:
 
     - name: Run the GitHub Issues script
       run: |
-        python generate_issues.py --label "${{ inputs.label }}" --language "${{ inputs.language }}" --stars ${{ inputs.stars }} --limit ${{ inputs.limit }}
+        python src/app.py --label "${{ inputs.label }}" --language "${{ inputs.language }}" --stars ${{ inputs.stars }} --limit ${{ inputs.limit }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
