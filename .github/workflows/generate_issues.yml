@@ -59,6 +59,10 @@ jobs:
       with:
         source: ./
         destination: ./_site
+    - name: List contents of _site directory
+      run: |
+        ls -l ./_site
+        ls -al
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
 
@@ -72,6 +76,10 @@ jobs:
       id-token: write
       pages: write
     steps:
+      - name: List contents of _site directory
+        run: |
+          ls -al ./_site
+          ls -al
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
