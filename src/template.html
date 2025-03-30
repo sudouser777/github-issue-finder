@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Issue Finder Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>GitHub Issues Search Results</h1>
+    <table id="issues-table">
+        <thead>
+            <tr>
+                <th>Repository</th>
+                <th>Issue Link</th>
+                <th>Stars</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamic rows will be inserted here -->
+            <!-- Example row (to be replaced with dynamic content) -->
+            <tr>
+                <td><a href="https://github.com/user/repo" target="_blank">user/repo</a></td>
+                <td><a href="https://github.com/user/repo/issues/1" target="_blank">Issue #1</a></td>
+                <td>150</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
