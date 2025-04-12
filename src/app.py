@@ -9,8 +9,10 @@ from github import Github
 from github.Auth import Token
 from github.Issue import Issue
 
+# GitHub API authentication token from environment variable
 auth = Token(os.getenv('GITHUB_TOKEN'))
 
+# Command line argument parser setup
 parser = argparse.ArgumentParser(prog='gh-issue-finder', description='helps in finding github issues')
 parser.add_argument('--label', help='label to find')
 parser.add_argument('--language', help='language to find')
@@ -20,6 +22,14 @@ args = parser.parse_args(sys.argv[1:])
 
 
 def filter_issue(issue: Issue) -> Issue | None:
+    """Filter issues based on repository star count.
+
+    Args:
+        issue: GitHub issue object to filter
+
+    Returns:
+        Issue if repository has sufficient stars, None otherwise
+    """
     try:
         if issue.repository.stargazers_count >= args.stars:
             return issue
@@ -28,6 +38,11 @@ def filter_issue(issue: Issue) -> Issue | None:
 
 
 def find_issues() -> list[Issue]:
+    """Search GitHub for issues matching specified criteria.
+
+    Returns:
+        List of filtered GitHub issues
+    """
     result = []
     try:
         gh = Github(auth=auth)
@@ -50,6 +65,12 @@ def find_issues() -> list[Issue]:
 
 
 def create_table_rows(soup: BeautifulSoup, issues: list[Issue]):
+    """Create HTML table rows for the found issues.
+
+    Args:
+        soup: BeautifulSoup object for HTML manipulation
+        issues: List of GitHub issues to display
+    """
     table_body = soup.find(id='issues-table').find('tbody')
     table_body.clear()
     key = lambda x: x.repository.full_name
@@ -94,6 +115,7 @@ def create_table_rows(soup: BeautifulSoup, issues: list[Issue]):
 
 
 def find_issues_and_populate_html() -> None:
+    """Main function to find issues and create HTML output."""
     issues = find_issues()
     with open('src/template.html') as fp, open('index.html', 'w') as fw:
         soup = BeautifulSoup(fp, features='html.parser')
@@ -102,6 +124,7 @@ def find_issues_and_populate_html() -> None:
 
 
 def main():
+    """Entry point of the script."""
     find_issues_and_populate_html()
 
 
